@@ -1,3 +1,56 @@
 {
-  "people": []
+  "people": [
+    {
+      "id": 1765307402215,
+      "firstName": "1",
+      "lastName": "1",
+      "usd": 1000,
+      "eur": 0,
+      "createdAt": "2025-12-09T19:10:02.215Z",
+      "updatedAt": "2025-12-09T19:10:12.448Z"
+    },
+    {
+      "id": 1765307427789,
+      "firstName": "Hydrogrun",
+      "lastName": "Grun",
+      "usd": 1000,
+      "eur": 200,
+      "createdAt": "2025-12-09T19:10:27.789Z",
+      "updatedAt": "2025-12-09T19:10:39.318Z"
+    }
+  ],
+  "transactions": [
+    {
+      "id": 1765307402215.6292,
+      "firstName": "1",
+      "lastName": "1",
+      "amount": 500,
+      "currency": "USD",
+      "createdAt": "2025-12-09T19:10:02.215Z"
+    },
+    {
+      "id": 1765307412448.918,
+      "firstName": "1",
+      "lastName": "1",
+      "amount": 500,
+      "currency": "USD",
+      "createdAt": "2025-12-09T19:10:12.448Z"
+    },
+    {
+      "id": 1765307427789.985,
+      "firstName": "Hydrogrun",
+      "lastName": "Grun",
+      "amount": 200,
+      "currency": "EUR",
+      "createdAt": "2025-12-09T19:10:27.789Z"
+    },
+    {
+      "id": 1765307439318.1528,
+      "firstName": "Hydrogrun",
+      "lastName": "Grun",
+      "amount": 1000,
+      "currency": "USD",
+      "createdAt": "2025-12-09T19:10:39.318Z"
+    }
+  ]
 }

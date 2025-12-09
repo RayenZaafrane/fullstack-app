@@ -102,9 +102,144 @@
       .conv-result{ margin-top:10px; font-weight:600; color:#dfe7f5 }
       @media (max-width:900px){ .converter{ position:fixed; right:12px; top:auto; bottom:20px; width:200px } }
       @media (max-width:520px){ .converter{ display:none } }
+      /* Slide menu on the left */
+      .slide-panel {
+        position:fixed;
+        left:0;
+        right:auto;
+        top:0;
+        height:100vh;
+        width:360px;
+        max-width:90vw;
+        background:rgba(10,12,16,0.98);
+        box-shadow:18px 0 40px rgba(0,0,0,0.6);
+        transform:translateX(-100%);
+        transition:transform 300ms ease;
+        z-index:50;
+        padding:18px;
+        overflow:auto;
+        color:#fff;
+      }
+      .slide-panel.open { transform:translateX(0%); }
+      .slide-toggle {
+        position:fixed; left:380px; top:18px; z-index:60; padding:8px 10px; border-radius:8px; background:#fff; color:#000; cursor:pointer; box-shadow:0 8px 20px rgba(0,0,0,0.4);
+      }
+      .slide-list { margin-top:12px; font-family:system-ui, monospace; font-size:13px }
+      .slide-item { padding:10px; border-bottom:1px solid rgba(255,255,255,0.04); display:flex; justify-content:space-between; gap:8px }
+      .slide-item .name { font-weight:600 }
+      .slide-filter { width:100%; padding:8px; border-radius:8px; border:1px solid rgba(255,255,255,0.06); background:rgba(255,255,255,0.02); color:#fff }
+      /* Bottom dropdown menu panel */
+      .dropdown-panel {
+        position:fixed;
+        left:12px;
+        bottom:50px;
+        z-index:85;
+        background:rgba(10,12,16,0.98);
+        border-radius:10px;
+        box-shadow:0 -8px 30px rgba(0,0,0,0.6);
+        padding:0;
+        max-height:0;
+        overflow:hidden;
+        transition:max-height 280ms ease;
+        width:280px;
+      }
+      .dropdown-panel.open {
+        max-height:400px;
+        overflow:auto;
+      }
+      .dropdown-header {
+        padding:12px;
+        border-bottom:1px solid rgba(255,255,255,0.08);
+        font-weight:600;
+        color:#fff;
+        font-size:14px;
+      }
+      .dropdown-item {
+        padding:12px;
+        border-bottom:1px solid rgba(255,255,255,0.04);
+        color:#ddd;
+        font-size:13px;
+        cursor:pointer;
+        transition:background 160ms ease;
+      }
+      .dropdown-item:hover {
+        background:rgba(255,255,255,0.06);
+      }
+      .dropdown-item-balance {
+        font-size:12px;
+        color:rgba(255,255,255,0.6);
+        margin-top:4px;
+      }
+      .dropdown-input-row {
+        padding:12px;
+        display:flex;
+        gap:8px;
+        align-items:center;
+        border-top:1px solid rgba(255,255,255,0.08);
+      }
+      .dropdown-input-row input,
+      .dropdown-input-row select {
+        padding:6px;
+        border-radius:6px;
+        border:1px solid rgba(255,255,255,0.06);
+        background:rgba(255,255,255,0.02);
+        color:#fff;
+        font-size:12px;
+      }
+      .dropdown-input-row button {
+        padding:6px 10px;
+        border-radius:6px;
+        background:#fff;
+        color:#000;
+        border:none;
+        cursor:pointer;
+        font-size:12px;
+        font-weight:600;
+        transition:background 160ms ease;
+      }
+      .dropdown-input-row button:hover {
+        background:#ddd;
+      }
+      .dropdown-toggle {
+        position:fixed;
+        left:12px;
+        bottom:12px;
+        z-index:90;
+        padding:8px 12px;
+        border-radius:8px;
+        cursor:pointer;
+        background:#fff;
+        color:#000;
+        border:none;
+        font-weight:600;
+        font-size:13px;
+        box-shadow:0 4px 12px rgba(0,0,0,0.3);
+        transition:transform 160ms ease;
+      }
+      .dropdown-toggle:hover {
+        transform:translateY(-2px);
+      }
+      .dropdown-toggle.active {
+        background:#000;
+        color:#fff;
+      }
     </style>
   </head>
   <body>
+    <!-- Bottom dropdown menu for Users -->
+    <div id="topPanel" class="dropdown-panel">
+      <div class="dropdown-header">Add to User Account</div>
+      <div id="dropdownUsersList"></div>
+      <div class="dropdown-input-row">
+        <input id="topAmount" type="number" step="0.01" min="0" placeholder="Amount" />
+        <select id="topCurrency">
+          <option value="USD">USD</option>
+          <option value="EUR">EUR</option>
+        </select>
+        <button id="topAddBtn">Add</button>
+      </div>
+    </div>
+    <button id="topToggleBtn" class="dropdown-toggle">Users ▾</button>
     <div class="waves" aria-hidden="true">
       <div class="wave w1"></div>
       <div class="wave w2"></div>
@@ -170,6 +305,21 @@
       <div id="convRateDisplay" class="conv-rate-bottom">1 TND ≈ —</div>
     </div>
 
+    <!-- Slide panel toggle and panel showing transaction history -->
+    <button id="slideToggle" class="slide-toggle">Show History</button>
+    <aside id="slidePanel" class="slide-panel" aria-hidden="true">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+        <h3 style="margin:0">Transaction History</h3>
+        <button id="slideClose" class="btn">Close</button>
+      </div>
+      <div style="margin-top:10px">
+        <input id="slideFilter" class="slide-filter" placeholder="Filter by name..." />
+      </div>
+      <div id="slideList" class="slide-list">
+        <div style="margin-top:14px;color:rgba(255,255,255,0.6)">Loading...</div>
+      </div>
+    </aside>
+
     <script>
       const form = document.getElementById('personForm');
       const firstName = document.getElementById('firstName');
@@ -208,7 +358,23 @@
           logList.innerHTML = '<div class="log-empty">No submissions yet.</div>';
           return;
         }
-        // show most recent first (compact rows). Each row can toggle details and be deleted.
+        // compute latest entry per name+currency (most recent)
+        const latestMap = new Map();
+        (people || []).slice().sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt)).forEach(p => {
+          const key = `${p.firstName}||${p.lastName}||${p.currency || ''}`;
+          if (!latestMap.has(key)) latestMap.set(key, p);
+        });
+        // compute cumulative totals per name+currency
+        const totalsMap = new Map();
+        (people || []).forEach(p => {
+          if (typeof p.amount === 'number' && p.currency) {
+            const key = `${p.firstName}||${p.lastName}||${p.currency}`;
+            const prev = totalsMap.get(key) || 0;
+            totalsMap.set(key, prev + p.amount);
+          }
+        });
+
+        // render items most recent first
         const rev = people.slice().reverse();
         rev.forEach(p => {
           const item = document.createElement('div');
@@ -221,11 +387,34 @@
           title.textContent = `${p.firstName} ${p.lastName}`;
           const sub = document.createElement('div');
           sub.className = 'log-sub';
-          let subText = `${new Date(p.createdAt).toLocaleString()}`;
-          if (p.amount !== undefined && p.currency) subText = `${p.amount} ${p.currency} · ${subText}`;
-          sub.textContent = subText;
+          const dateText = `${new Date(p.createdAt).toLocaleString()}`;
+
+          const key = `${p.firstName}||${p.lastName}||${p.currency || ''}`;
+          const latest = latestMap.get(key);
+          const total = totalsMap.get(key);
+          // Show cumulative total only on the latest entry for the group; keep older rows showing their original value
+          if (latest && latest.id === p.id && typeof total === 'number' && p.currency) {
+            // on the latest record show cumulative total (older + new input)
+            sub.textContent = `${Number(total).toFixed(2)} ${p.currency} · ${dateText}`;
+          } else if (p.amount !== undefined && p.currency) {
+            // older entries keep their own amount
+            sub.textContent = `${Number(p.amount).toFixed(2)} ${p.currency} · ${dateText}`;
+          } else {
+            sub.textContent = dateText;
+          }
+
           main.appendChild(title);
           main.appendChild(sub);
+
+          // if this row is the latest record for the group, show the green delta (the added amount)
+          if (latest && latest.id === p.id && typeof p.amount === 'number' && p.currency) {
+            const delta = document.createElement('div');
+            delta.style.color = '#2ecc71';
+            delta.style.fontWeight = '700';
+            delta.style.marginTop = '4px';
+            delta.textContent = `+${Number(p.amount).toFixed(2)} ${p.currency}`;
+            main.appendChild(delta);
+          }
 
           const actions = document.createElement('div');
           actions.className = 'log-actions';
@@ -281,6 +470,22 @@
           if (entryAmountEl && entryAmountEl.value) payload.amount = parseFloat(entryAmountEl.value);
           if (entryCurrencyEl && entryCurrencyEl.value) payload.currency = entryCurrencyEl.value;
         if (!payload.firstName || !payload.lastName) return alert('Both fields required');
+        
+        // If TND is selected, convert to USD and EUR before sending
+        if (payload.currency === 'TND' && payload.amount) {
+          const rates = await fetchRates();
+          if (rates && typeof rates.USD === 'number' && typeof rates.EUR === 'number') {
+            const usdAmount = payload.amount * rates.USD;
+            const eurAmount = payload.amount * rates.EUR;
+            payload.currency = 'USD';
+            payload.amount = usdAmount;
+            payload.usdEquivalent = usdAmount;
+            payload.eurEquivalent = eurAmount;
+          } else {
+            return alert('Unable to fetch conversion rates for TND. Please try again.');
+          }
+        }
+        
         const res = await fetch('/api/people', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -335,6 +540,104 @@
 
       // initial load
       fetchPeople();
+
+      // Slide panel elements
+      const slideToggle = document.getElementById('slideToggle');
+      const slidePanel = document.getElementById('slidePanel');
+      const slideClose = document.getElementById('slideClose');
+      const slideList = document.getElementById('slideList');
+      const slideFilter = document.getElementById('slideFilter');
+
+      function openSlidePanel(){
+        slidePanel.classList.add('open');
+        slidePanel.setAttribute('aria-hidden','false');
+        slideToggle.textContent = 'Hide History';
+      }
+      function closeSlidePanel(){
+        slidePanel.classList.remove('open');
+        slidePanel.setAttribute('aria-hidden','true');
+        slideToggle.textContent = 'Show History';
+      }
+      slideToggle.addEventListener('click', () => { if (slidePanel.classList.contains('open')) closeSlidePanel(); else openSlidePanel(); });
+      slideClose.addEventListener('click', closeSlidePanel);
+
+      // Render transaction history from transactions array (newest first)
+      function renderTransactionHistory(transactions){
+        const filter = (slideFilter.value || '').trim().toLowerCase();
+        slideList.innerHTML = '';
+        if (!transactions || !transactions.length) { slideList.innerHTML = '<div class="log-empty">No transactions yet.</div>'; return; }
+        
+        // Sort by date descending (newest first)
+        const sorted = (transactions || []).slice().sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        
+        sorted.forEach(t => {
+          const fullName = `${t.firstName} ${t.lastName}`;
+          if (filter && !fullName.toLowerCase().includes(filter)) return;
+          const item = document.createElement('div');
+          item.className = 'slide-item';
+          const name = document.createElement('div');
+          name.className = 'name';
+          name.textContent = fullName;
+          const right = document.createElement('div');
+          right.style.textAlign = 'right';
+          const amt = document.createElement('div');
+          amt.style.fontWeight = '700';
+          amt.style.color = '#2ecc71';
+          // show inputted amount with + prefix and currency
+          if (typeof t.amount === 'number' && t.currency) {
+            amt.textContent = `+${Number(t.amount).toFixed(2)} ${t.currency}`;
+          } else {
+            amt.textContent = '—';
+          }
+          const meta = document.createElement('div');
+          meta.style.fontSize = '12px';
+          meta.style.color = 'rgba(255,255,255,0.6)';
+          meta.textContent = new Date(t.createdAt).toLocaleString();
+          right.appendChild(amt);
+          right.appendChild(meta);
+          item.appendChild(name);
+          item.appendChild(right);
+          slideList.appendChild(item);
+        });
+      }
+
+      // Build transaction history: all transactions sorted by date (newest first)
+      function buildTransactionHistory(people){
+        const arr = (people || []).slice();
+        // Sort by createdAt descending (newest first)
+        arr.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        return arr;
+      }
+
+      // render the slide list as transaction history with optional filter
+      function renderSlideList(people){
+        fetchTransactions();
+      }
+
+      // Update filter to re-render transactions
+      slideFilter.addEventListener('input', () => {
+        fetchTransactions();
+      });
+
+      // Update both log and slide panel when fetching
+      async function fetchPeople() {
+        const res = await fetch('/api/people');
+        const people = await res.json();
+        // update log and slide
+        renderLog(people);
+        renderSlideList(people);
+      }
+      
+      // Fetch transactions for history panel
+      async function fetchTransactions() {
+        try {
+          const res = await fetch('/api/transactions');
+          const transactions = await res.json();
+          renderTransactionHistory(transactions);
+        } catch (e) {
+          console.error('Failed to fetch transactions:', e);
+        }
+      }
 
       // Currency converter logic
       const convAmount = document.getElementById('convAmount');
@@ -406,6 +709,123 @@
 
       // initialize rate display
       updateRateDisplay().catch(() => { convRateDisplay.textContent = 'Rate unavailable'; });
+
+      // --- Bottom dropdown menu for Users ---
+      const topPanel = document.getElementById('topPanel');
+      const topToggleBtn = document.getElementById('topToggleBtn');
+      const dropdownUsersList = document.getElementById('dropdownUsersList');
+      const topAmount = document.getElementById('topAmount');
+      const topCurrency = document.getElementById('topCurrency');
+      const topAddBtn = document.getElementById('topAddBtn');
+      let selectedUserKey = null;
+
+      function openTopPanel(){
+        topPanel.classList.add('open');
+        topToggleBtn.classList.add('active');
+      }
+      function closeTopPanel(){
+        topPanel.classList.remove('open');
+        topToggleBtn.classList.remove('active');
+      }
+      topToggleBtn.addEventListener('click', () => {
+        if (topPanel.classList.contains('open')) closeTopPanel();
+        else openTopPanel();
+      });
+
+      // populate dropdown user list (deduplicated by name, showing balances)
+      function populateTopUsers(people){
+        dropdownUsersList.innerHTML = '';
+        const seen = new Set();
+        (people || []).forEach(p => {
+          const nameKey = `${String(p.firstName||'').trim()}||${String(p.lastName||'').trim()}`;
+          if (seen.has(nameKey)) return;
+          seen.add(nameKey);
+          
+          const item = document.createElement('div');
+          item.className = 'dropdown-item';
+          item.style.cursor = 'pointer';
+          
+          const name = document.createElement('div');
+          name.textContent = `${p.firstName} ${p.lastName}`;
+          name.style.fontWeight = '600';
+          name.style.color = '#fff';
+          
+          const balance = document.createElement('div');
+          balance.className = 'dropdown-item-balance';
+          const usd = (typeof p.usd === 'number') ? Number(p.usd).toFixed(2) : (p.usd || '0.00');
+          const eur = (typeof p.eur === 'number') ? Number(p.eur).toFixed(2) : (p.eur || '0.00');
+          balance.textContent = `USD: ${usd}  •  EUR: ${eur}`;
+          
+          item.appendChild(name);
+          item.appendChild(balance);
+          item.addEventListener('click', () => {
+            selectedUserKey = nameKey;
+            // highlight selected
+            document.querySelectorAll('.dropdown-item').forEach(el => el.style.background = '');
+            item.style.background = 'rgba(255,255,255,0.12)';
+          });
+          
+          dropdownUsersList.appendChild(item);
+        });
+      }
+
+      // helper: convert EUR -> USD using open.er-api.com
+      async function convertEURtoUSD(eurAmount){
+        try {
+          const res = await fetch('https://open.er-api.com/v6/latest/EUR');
+          if (!res.ok) return null;
+          const data = await res.json();
+          if (!data || !data.rates || typeof data.rates.USD !== 'number') return null;
+          return eurAmount * data.rates.USD;
+        } catch (e) { return null; }
+      }
+
+      topAddBtn.addEventListener('click', async () => {
+        if (!selectedUserKey) return alert('Please select a user from the list');
+        const [first, last] = selectedUserKey.split('||');
+        const amt = parseFloat(topAmount.value || '0');
+        if (!amt || amt <= 0) return alert('Enter an amount > 0');
+        const currency = topCurrency.value || 'USD';
+        const payload = { firstName: first, lastName: last, amount: amt, currency };
+        
+        // If USD is selected, add to USD balance
+        if (currency === 'USD') {
+          // USD goes directly to USD
+          payload.currency = 'USD';
+        } else if (currency === 'EUR') {
+          // EUR goes directly to EUR, also calculate USD equivalent
+          payload.currency = 'EUR';
+          const usdEq = await convertEURtoUSD(amt);
+          if (usdEq !== null) payload.usdEquivalent = Number(usdEq.toFixed(4));
+        }
+        
+        try {
+          const res = await fetch('/api/people', {
+            method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(payload)
+          });
+          if (res.ok) {
+            topAmount.value = '';
+            selectedUserKey = null;
+            await fetchPeople();
+            alert('Added to user account');
+            closeTopPanel();
+          } else {
+            const err = await res.json();
+            alert(err && err.error ? err.error : 'Failed to add');
+          }
+        } catch (e) { alert('Failed to add'); }
+      });
+
+      // ensure top user list is refreshed when people change
+      const origFetchPeople = fetchPeople;
+      fetchPeople = async () => {
+        const res = await fetch('/api/people');
+        const people = await res.json();
+        renderLog(people);
+        renderSlideList(people);
+        populateTopUsers(people);
+      };
+
     </script>
   </body>
 </html>

@@ -8,6 +8,29 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, "public")));
 
+// Cache for exchange rates
+let _cachedRates = null;
+let _cachedAt = 0;
+const RATE_CACHE_TTL = 10 * 60 * 1000; // 10 minutes
+
+async function fetchRates() {
+  const now = Date.now();
+  if (_cachedRates && (now - _cachedAt) < RATE_CACHE_TTL) return _cachedRates;
+  try {
+    const res = await fetch('https://open.er-api.com/v6/latest/TND');
+    if (!res.ok) throw new Error('Network');
+    const data = await res.json();
+    if (data && (data.result === 'success')) {
+      _cachedRates = data.rates || null;
+      _cachedAt = Date.now();
+      return _cachedRates;
+    }
+    return null;
+  } catch (e) {
+    return null;
+  }
+}
+
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "index.html"));
 });
@@ -21,7 +44,16 @@ app.get("/api/people", (req, res) => {
   }
 });
 
-app.post("/api/people", (req, res) => {
+app.get("/api/transactions", (req, res) => {
+  try {
+    const transactions = db.getAllTransactions();
+    res.json(transactions);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to read transactions" });
+  }
+});
+
+app.post("/api/people", async (req, res) => {
   const { firstName, lastName, amount, currency } = req.body;
   if (!firstName || !lastName) {
     return res.status(400).json({ error: "firstName and lastName are required" });
@@ -32,7 +64,22 @@ app.post("/api/people", (req, res) => {
       const n = Number(amount);
       if (!Number.isNaN(n)) payload.amount = n;
     }
-    if (currency) payload.currency = String(currency);
+    if (currency) payload.currency = String(currency).toUpperCase();
+
+    // If TND is provided, convert to USD and EUR
+    if (payload.currency === 'TND' && payload.amount) {
+      const rates = await fetchRates();
+      if (rates && typeof rates.USD === 'number' && typeof rates.EUR === 'number') {
+        const usdAmount = payload.amount * rates.USD;
+        const eurAmount = payload.amount * rates.EUR;
+        // Store as USD amount with conversion info
+        payload.currency = 'USD';
+        payload.amount = usdAmount;
+        payload.usdEquivalent = usdAmount;
+        payload.eurEquivalent = eurAmount;
+      }
+    }
+
     const person = db.addPerson(payload);
     res.status(201).json(person);
   } catch (err) {
