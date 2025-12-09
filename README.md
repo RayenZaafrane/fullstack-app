@@ -5,7 +5,7 @@ Simple Express app to collect first and last names and persist them in a local J
 Run locally (PowerShell):
 
 ```powershell
-cd c:\Users\souih\fullstack-app
+cd c:\Users\username\fullstack-app
 npm install
 # Development (auto-restarts)
 npm run dev
