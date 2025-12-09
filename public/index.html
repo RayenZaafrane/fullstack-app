@@ -1,0 +1,411 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Data Storage</title>
+    <style>
+      /* Page layout */
+      :root{--card-bg:rgba(255,255,255,0.06);--accent1:#0f1724;--accent2:#0b1020}
+      html,body{height:100%;}
+      body {
+        margin:0;
+        font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+        color: #fff;
+        background: #050507;
+        min-height:100vh;
+        display:flex;
+        align-items:flex-start;
+        justify-content:center;
+        padding:48px 16px;
+        position:relative;
+        overflow:auto; /* allow page scrolling */
+        -webkit-overflow-scrolling: touch;
+      }
+
+      /* Animated colored waves */
+      .waves {
+        position:fixed;
+        inset:0;
+        pointer-events:none;
+        z-index:0;
+        overflow:hidden;
+      }
+      .wave {
+        position:absolute;
+        width:140vmax;
+        height:140vmax;
+        left:50%;
+        top:50%;
+        transform:translate(-50%,-50%);
+        border-radius:50%;
+        filter: blur(120px) saturate(140%);
+        opacity:0.55;
+        mix-blend-mode: screen;
+        animation: float 14s linear infinite;
+      }
+      .wave.w1{ background: radial-gradient(circle at 30% 30%, rgba(255,40,110,0.18), rgba(0,0,0,0) 30%), linear-gradient(120deg, rgba(10,10,10,1), rgba(20,24,30,1)); animation-duration:18s; left:40%; top:45%; }
+      .wave.w2{ background: radial-gradient(circle at 70% 40%, rgba(80,160,255,0.14), rgba(0,0,0,0) 28%), linear-gradient(120deg, rgba(6,6,8,1), rgba(18,22,28,1)); animation-duration:22s; left:60%; top:55%; }
+      .wave.w3{ background: radial-gradient(circle at 50% 70%, rgba(120,80,255,0.12), rgba(0,0,0,0) 30%), linear-gradient(120deg, rgba(0,0,0,1), rgba(20,16,24,1)); animation-duration:26s; left:50%; top:50%; opacity:0.45 }
+
+      @keyframes float {
+        0%{ transform: translate(-50%,-50%) scale(1) rotate(0deg); }
+        50%{ transform: translate(-45%,-55%) scale(1.05) rotate(12deg); }
+        100%{ transform: translate(-50%,-50%) scale(1) rotate(0deg); }
+      }
+
+      /* Content card */
+      .container{ position:relative; z-index:2; width:100%; max-width:720px; padding-top:40px; }
+      h1{ margin:0 0 18px 0; font-size:28px; letter-spacing: -0.2px }
+      form{ background:var(--card-bg); padding:18px; border-radius:12px; box-shadow: 0 8px 30px rgba(2,6,23,0.6); }
+      label{ display:block; margin-top:8px; color: #e6eef8 }
+      input{ padding:10px; width:100%; max-width:100%; margin-top:6px; border-radius:8px; border:1px solid rgba(255,255,255,0.06); background: rgba(255,255,255,0.02); color:#fff }
+
+      /* Button styles */
+      .btn{ display:inline-block; margin-top:12px; padding:10px 14px; border-radius:10px; border:none; background:#fff; color:#000; cursor:pointer; transition: background 320ms ease, color 320ms ease, transform 160ms ease; box-shadow: 0 6px 18px rgba(2,6,23,0.6); }
+      .btn:hover, .btn:focus{ background:#000; color:#fff; transform: translateY(-3px); }
+      #refreshBtn{ margin-top:14px }
+
+      /* Log panel (inline, simple card like main form) */
+      .log-panel{ display:none; position:relative; margin-top:14px; width:100%; background:var(--card-bg); border-radius:12px; padding:12px; box-shadow: 0 8px 30px rgba(2,6,23,0.6); max-height:360px; overflow:auto }
+      .log-panel.open{ display:block }
+      .log-header{ display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:8px }
+      .log-title{ font-weight:600; color:#fff }
+      .log-list{ font-family:system-ui, monospace; font-size:13px; color:#d7e3ff; }
+      .log-item{ padding:8px; border-bottom:1px dashed rgba(255,255,255,0.04); display:flex; align-items:center; justify-content:space-between; gap:8px }
+      .log-main{ display:flex; flex-direction:column }
+      .log-title-small{ font-weight:600; color:#fff }
+      .log-sub{ font-size:12px; color:rgba(255,255,255,0.75) }
+      .log-actions{ display:flex; gap:8px; align-items:center }
+      .log-btn{ padding:6px 8px; border-radius:8px; border:none; background:rgba(255,255,255,0.06); color:#fff; cursor:pointer }
+      .log-btn:hover{ background:rgba(255,255,255,0.12) }
+      .log-detail{ margin-top:8px; font-family:monospace; font-size:12px; color:#cfe3ff; display:none; white-space:pre-wrap }
+      .log-meta{ font-size:12px; color:rgba(255,255,255,0.6); margin-top:6px }
+      .log-empty{ color:rgba(255,255,255,0.6); padding:18px; text-align:center }
+
+      .list{ margin-top:18px; background: transparent }
+      .item{ padding:10px 0; border-bottom:1px solid rgba(255,255,255,0.04); color:#dfe7f5 }
+
+      /* Responsive */
+      @media (max-width:520px){ body{ padding:20px 12px } h1{ font-size:20px } }
+      /* Right-side converter */
+      .converter{ position:fixed; right:20px; top:160px; width:220px; background:rgba(255,255,255,0.04); border-radius:12px; padding:12px; box-shadow:0 8px 28px rgba(2,6,23,0.6); z-index:6; color:#fff; font-size:14px }
+      .converter h3{ margin:0 0 10px 0; font-size:15px; position:relative }
+      .conv-rate-bottom{ margin-top:12px; display:block; text-align:center; font-size:13px; color:rgba(255,255,255,0.95); background: rgba(0,0,0,0.16); padding:6px 10px; border-radius:8px }
+      .conv-row{ display:flex; gap:8px; align-items:center }
+      .conv-input{ width:100%; padding:8px; border-radius:8px; border:1px solid rgba(255,255,255,0.06); background:rgba(255,255,255,0.02); color:#fff }
+      .conv-select{ appearance:none; -webkit-appearance:none; -moz-appearance:none; padding:8px 28px 8px 10px; border-radius:8px; border:1px solid rgba(255,255,255,0.06); background:rgba(255,255,255,0.02); color:#fff; position:relative }
+      .conv-select-wrap{ position:relative; display:inline-block }
+      .conv-select-wrap:after{ content:'▾'; position:absolute; right:8px; top:50%; transform:translateY(-50%); pointer-events:none; color:rgba(255,255,255,0.8) }
+      .conv-btn{ margin-top:10px; width:100%; padding:8px; border-radius:8px; border:none; background:#fff; color:#000; cursor:pointer; transition:background 220ms ease, transform 120ms ease }
+      .conv-btn:hover{ background:#000; color:#fff; transform:translateY(-2px) }
+      .conv-result{ margin-top:10px; font-weight:600; color:#dfe7f5 }
+      @media (max-width:900px){ .converter{ position:fixed; right:12px; top:auto; bottom:20px; width:200px } }
+      @media (max-width:520px){ .converter{ display:none } }
+    </style>
+  </head>
+  <body>
+    <div class="waves" aria-hidden="true">
+      <div class="wave w1"></div>
+      <div class="wave w2"></div>
+      <div class="wave w3"></div>
+    </div>
+    
+    <div class="container">
+        <h1>Input your values</h1>
+    <form id="personForm">
+      <label>First name
+        <input id="firstName" name="firstName" required />
+      </label>
+      <label>Last name
+        <input id="lastName" name="lastName" required />
+      </label>
+      <label>Amount
+        <input id="entryAmount" name="amount" type="number" step="0.01" min="0" placeholder="e.g. 100" />
+      </label>
+      <label>Currency
+        <select id="entryCurrency" name="currency">
+          <option value="TND">TND</option>
+          <option value="USD">USD</option>
+          <option value="EUR">EUR</option>
+        </select>
+      </label>
+      <button class="btn" type="submit">Save</button>
+    </form>
+
+      <button id="showLogBtn" class="btn">Show Log</button>
+
+    <aside id="logPanel" class="log-panel" aria-hidden="true">
+      <div class="log-header">
+        <div class="log-title">Submission Log</div>
+        <div>
+          <button id="logClear" class="btn" title="Erase all">Erase All</button>
+        </div>
+      </div>
+      <div id="logList" class="log-list">
+        <div class="log-empty">No submissions yet.</div>
+      </div>
+    </aside>
+
+    </div>
+
+    <!-- Right-side currency converter (TND -> USD/EUR) -->
+    <div class="converter" id="converter">
+      <h3 style="position:relative; margin-bottom:8px">Currency Converter</h3>
+      <div style="font-size:12px; color:rgba(255,255,255,0.7); margin-bottom:8px">Convert TND to USD or EUR</div>
+      <div class="conv-row">
+        <input id="convAmount" class="conv-input" type="number" step="0.01" min="0" value="1" />
+      </div>
+      <div style="margin-top:8px; display:flex; gap:8px">
+        <div class="conv-select-wrap" style="flex:1">
+          <select id="convTarget" class="conv-select">
+            <option value="USD">USD</option>
+            <option value="EUR">EUR</option>
+          </select>
+        </div>
+        <button id="convBtn" class="conv-btn">Convert</button>
+      </div>
+      <div id="convResult" class="conv-result"> </div>
+      <div id="convNote" style="font-size:11px;color:rgba(255,255,255,0.6);margin-top:6px">Rates from exchangerate.host</div>
+      <div id="convRateDisplay" class="conv-rate-bottom">1 TND ≈ —</div>
+    </div>
+
+    <script>
+      const form = document.getElementById('personForm');
+      const firstName = document.getElementById('firstName');
+      const lastName = document.getElementById('lastName');
+      const refreshBtn = null;
+      const showLogBtn = document.getElementById('showLogBtn');
+      const logPanel = document.getElementById('logPanel');
+      const logList = document.getElementById('logList');
+      const logClear = document.getElementById('logClear');
+      const entryAmountEl = document.getElementById('entryAmount');
+      const entryCurrencyEl = document.getElementById('entryCurrency');
+
+      // Ensure amount input keeps two decimal places on blur/change
+      if (entryAmountEl) {
+        function roundAmount() {
+          const v = parseFloat(entryAmountEl.value);
+          if (!Number.isNaN(v)) {
+            // Preserve two decimal places (use toFixed to keep cents)
+            entryAmountEl.value = String(Number(v).toFixed(2));
+          }
+        }
+        entryAmountEl.addEventListener('blur', roundAmount);
+        entryAmountEl.addEventListener('change', roundAmount);
+      }
+
+      async function fetchPeople() {
+        const res = await fetch('/api/people');
+        const people = await res.json();
+        // only update the log panel (do not show logs on main page)
+        renderLog(people);
+      }
+
+      function renderLog(people){
+        logList.innerHTML = '';
+        if (!people || !people.length) {
+          logList.innerHTML = '<div class="log-empty">No submissions yet.</div>';
+          return;
+        }
+        // show most recent first (compact rows). Each row can toggle details and be deleted.
+        const rev = people.slice().reverse();
+        rev.forEach(p => {
+          const item = document.createElement('div');
+          item.className = 'log-item';
+
+          const main = document.createElement('div');
+          main.className = 'log-main';
+          const title = document.createElement('div');
+          title.className = 'log-title-small';
+          title.textContent = `${p.firstName} ${p.lastName}`;
+          const sub = document.createElement('div');
+          sub.className = 'log-sub';
+          let subText = `${new Date(p.createdAt).toLocaleString()}`;
+          if (p.amount !== undefined && p.currency) subText = `${p.amount} ${p.currency} · ${subText}`;
+          sub.textContent = subText;
+          main.appendChild(title);
+          main.appendChild(sub);
+
+          const actions = document.createElement('div');
+          actions.className = 'log-actions';
+          const detailsBtn = document.createElement('button');
+          detailsBtn.className = 'log-btn';
+          detailsBtn.textContent = 'Details';
+          const delBtn = document.createElement('button');
+          delBtn.className = 'log-btn';
+          delBtn.textContent = 'Delete';
+          actions.appendChild(detailsBtn);
+          actions.appendChild(delBtn);
+
+          const detail = document.createElement('div');
+          detail.className = 'log-detail';
+          detail.textContent = JSON.stringify(p, null, 2);
+
+          detailsBtn.addEventListener('click', () => {
+            if (detail.style.display === 'block') { detail.style.display = 'none'; detailsBtn.textContent = 'Details'; }
+            else { detail.style.display = 'block'; detailsBtn.textContent = 'Hide'; }
+          });
+
+          delBtn.addEventListener('click', async () => {
+            if (!confirm('Delete this entry?')) return;
+            try {
+              const res = await fetch(`/api/people/${p.id}`, { method: 'DELETE' });
+              if (res.ok) {
+                await fetchPeople();
+              } else {
+                const err = await res.json();
+                alert(err && err.error ? err.error : 'Failed to delete');
+              }
+            } catch (e) {
+              alert('Failed to delete entry');
+            }
+          });
+
+          item.appendChild(main);
+          item.appendChild(actions);
+          // append detail as full-width block under the item
+          const wrapper = document.createElement('div');
+          wrapper.appendChild(item);
+          wrapper.appendChild(detail);
+          logList.appendChild(wrapper);
+        });
+      }
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const payload = { firstName: firstName.value.trim(), lastName: lastName.value.trim() };
+          // include optional amount/currency from the form
+          const entryAmountEl = document.getElementById('entryAmount');
+          const entryCurrencyEl = document.getElementById('entryCurrency');
+          if (entryAmountEl && entryAmountEl.value) payload.amount = parseFloat(entryAmountEl.value);
+          if (entryCurrencyEl && entryCurrencyEl.value) payload.currency = entryCurrencyEl.value;
+        if (!payload.firstName || !payload.lastName) return alert('Both fields required');
+        const res = await fetch('/api/people', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        if (res.ok) {
+          firstName.value = '';
+          lastName.value = '';
+          await fetchPeople();
+          // open log panel briefly to show entry
+          openLogPanel();
+        } else {
+          const err = await res.json();
+          alert(err && err.error ? err.error : 'Failed to save');
+        }
+      });
+
+      // refresh button removed; logs updated automatically after actions
+
+      // Show/hide inline log panel
+      function openLogPanel(){
+        logPanel.classList.add('open');
+        logPanel.setAttribute('aria-hidden','false');
+        showLogBtn.textContent = 'Hide Log';
+      }
+      function closeLogPanel(){
+        logPanel.classList.remove('open');
+        logPanel.setAttribute('aria-hidden','true');
+        showLogBtn.textContent = 'Show Log';
+      }
+      showLogBtn.addEventListener('click', () => {
+        if (logPanel.classList.contains('open')) closeLogPanel(); else openLogPanel();
+      });
+
+      // Erase all persisted data (sends DELETE to server)
+      logClear.addEventListener('click', async () => {
+        if (!confirm('Erase all saved entries? This will remove them locally.')) return;
+        try {
+          const res = await fetch('/api/people', { method: 'DELETE' });
+          if (res.ok) {
+            await fetchPeople();
+            alert('All entries erased.');
+            closeLogPanel();
+          } else {
+            const err = await res.json();
+            alert(err && err.error ? err.error : 'Failed to erase');
+          }
+        } catch (e) {
+          alert('Failed to erase entries.');
+        }
+      });
+
+      // initial load
+      fetchPeople();
+
+      // Currency converter logic
+      const convAmount = document.getElementById('convAmount');
+      const convTarget = document.getElementById('convTarget');
+      const convBtn = document.getElementById('convBtn');
+      const convResult = document.getElementById('convResult');
+      const convRateDisplay = document.getElementById('convRateDisplay');
+
+      // Use open.er-api.com for free latest rates (base TND). Cache for 10 minutes.
+      let _cachedRates = null;
+      let _cachedAt = 0;
+      async function fetchRates() {
+        const now = Date.now();
+        if (_cachedRates && (now - _cachedAt) < 10 * 60 * 1000) return _cachedRates;
+        try {
+          const res = await fetch('https://open.er-api.com/v6/latest/TND');
+          if (!res.ok) throw new Error('Network');
+          const data = await res.json();
+          if (data && (data.result === 'success' || data.result === 'success')) {
+            _cachedRates = data.rates || null;
+            _cachedAt = Date.now();
+            return _cachedRates;
+          }
+          return null;
+        } catch (e) {
+          return null;
+        }
+      }
+
+      async function updateRateDisplay(){
+        convRateDisplay.textContent = 'Loading...';
+        const rates = await fetchRates();
+        const target = convTarget.value || 'USD';
+        if (!rates || typeof rates[target] !== 'number'){
+          convRateDisplay.textContent = 'Rate unavailable';
+          return;
+        }
+        convRateDisplay.textContent = `1 TND ≈ ${rates[target].toFixed(4)} ${target}`;
+      }
+
+      convTarget.addEventListener('change', updateRateDisplay);
+
+      convBtn.addEventListener('click', async () => {
+        const amt = parseFloat(convAmount.value || '0');
+        if (!amt || amt <= 0) { convResult.textContent = 'Enter a value > 0'; return; }
+        convResult.textContent = 'Converting...';
+        const rates = await fetchRates();
+        if (!rates) { convResult.textContent = 'Failed to fetch rates'; return; }
+        const target = convTarget.value || 'USD';
+        const rate = rates[target];
+        if (typeof rate !== 'number') { convResult.textContent = 'Rate unavailable'; return; }
+        const converted = (amt * rate).toFixed(4);
+        convResult.textContent = `${amt} TND ≈ ${converted} ${target}`;
+        // ensure the rate display is refreshed after conversion
+        convRateDisplay.textContent = `1 TND ≈ ${rate.toFixed(4)} ${target}`;
+        // populate the main form amount and currency with converted value
+        try {
+          if (typeof entryAmountEl !== 'undefined' && entryAmountEl) {
+            // set to 2 decimal places for clarity
+            entryAmountEl.value = Number(converted).toFixed(2);
+          }
+          if (typeof entryCurrencyEl !== 'undefined' && entryCurrencyEl) {
+            entryCurrencyEl.value = target;
+          }
+        } catch (e) {
+          // ignore if form elements not present
+        }
+      });
+
+      // initialize rate display
+      updateRateDisplay().catch(() => { convRateDisplay.textContent = 'Rate unavailable'; });
+    </script>
+  </body>
+</html>
