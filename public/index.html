@@ -94,9 +94,9 @@
       .conv-rate-bottom{ margin-top:12px; display:block; text-align:center; font-size:13px; color:rgba(255,255,255,0.95); background: rgba(0,0,0,0.16); padding:6px 10px; border-radius:8px }
       .conv-row{ display:flex; gap:8px; align-items:center }
       .conv-input{ width:100%; padding:8px; border-radius:8px; border:1px solid rgba(255,255,255,0.06); background:rgba(255,255,255,0.02); color:#fff }
-      .conv-select{ appearance:none; -webkit-appearance:none; -moz-appearance:none; padding:8px 28px 8px 10px; border-radius:8px; border:1px solid rgba(255,255,255,0.06); background:rgba(255,255,255,0.02); color:#fff; position:relative }
+      .conv-select{ appearance:auto; -webkit-appearance:none; -moz-appearance:none; padding:8px 28px 8px 10px; border-radius:8px; border:1px solid rgba(255,255,255,0.06); background:rgba(255, 255, 255, 0.02); color:#fff; position:relative }
       .conv-select-wrap{ position:relative; display:inline-block }
-      .conv-select-wrap:after{ content:'▾'; position:absolute; right:8px; top:50%; transform:translateY(-50%); pointer-events:none; color:rgba(255,255,255,0.8) }
+      .conv-select-wrap:after{ content:'▾'; position:absolute; right:8px; top:50%; transform:translateY(-50%); pointer-events:none; color:rgba(162, 162, 162, 0.8) }
       .conv-btn{ margin-top:10px; width:100%; padding:8px; border-radius:8px; border:none; background:#fff; color:#000; cursor:pointer; transition:background 220ms ease, transform 120ms ease }
       .conv-btn:hover{ background:#000; color:#fff; transform:translateY(-2px) }
       .conv-result{ margin-top:10px; font-weight:600; color:#dfe7f5 }
@@ -140,12 +140,13 @@
         padding:0;
         max-height:0;
         overflow:hidden;
-        transition:max-height 280ms ease;
+        transition:max-height 300ms cubic-bezier(0.4, 0, 0.2, 1);
         width:280px;
       }
       .dropdown-panel.open {
-        max-height:400px;
+        max-height:420px;
         overflow:auto;
+        box-shadow:0 -12px 40px rgba(0,0,0,0.8);
       }
       .dropdown-header {
         padding:12px;
@@ -160,15 +161,25 @@
         color:#ddd;
         font-size:13px;
         cursor:pointer;
-        transition:background 160ms ease;
+        transition:all 150ms ease;
       }
       .dropdown-item:hover {
-        background:rgba(255,255,255,0.06);
+        background:rgba(255,255,255,0.08);
+        padding-left:16px;
+        color:#fff;
+      }
+      .dropdown-item:active {
+        background:rgba(255,255,255,0.12);
+        transform:scale(0.98);
       }
       .dropdown-item-balance {
         font-size:12px;
         color:rgba(255,255,255,0.6);
         margin-top:4px;
+        transition:color 150ms ease;
+      }
+      .dropdown-item:hover .dropdown-item-balance {
+        color:rgba(255,255,255,0.8);
       }
       .dropdown-input-row {
         padding:12px;
@@ -176,18 +187,44 @@
         gap:8px;
         align-items:center;
         border-top:1px solid rgba(255,255,255,0.08);
+        background:rgba(0,0,0,0.3);
       }
       .dropdown-input-row input,
       .dropdown-input-row select {
-        padding:6px;
+        padding:8px 10px;
         border-radius:6px;
-        border:1px solid rgba(255,255,255,0.06);
-        background:rgba(255,255,255,0.02);
+        border:1px solid rgba(255,255,255,0.12);
+        background:rgba(255,255,255,0.06);
         color:#fff;
         font-size:12px;
+        transition:all 200ms ease;
+        cursor:pointer;
+      }
+      .dropdown-input-row input:hover,
+      .dropdown-input-row select:hover {
+        background:rgba(255,255,255,0.1);
+        border-color:rgba(255,255,255,0.2);
+      }
+      .dropdown-input-row input:focus,
+      .dropdown-input-row select:focus {
+        outline:none;
+        background:rgba(255,255,255,0.12);
+        border-color:rgba(255,255,255,0.3);
+        box-shadow:0 0 8px rgba(255,255,255,0.1);
+      }
+      .dropdown-input-row select {
+        appearance:none;
+        -webkit-appearance:none;
+        -moz-appearance:none;
+        padding-right:28px;
+        background-image:url('data:image/svg+xml;utf8,<svg fill="white" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>');
+        background-repeat:no-repeat;
+        background-position:right 6px center;
+        background-size:20px;
+        padding-right:32px;
       }
       .dropdown-input-row button {
-        padding:6px 10px;
+        padding:8px 14px;
         border-radius:6px;
         background:#fff;
         color:#000;
@@ -195,17 +232,128 @@
         cursor:pointer;
         font-size:12px;
         font-weight:600;
-        transition:background 160ms ease;
+        transition:all 200ms ease;
+        box-shadow:0 2px 8px rgba(255,255,255,0.1);
       }
       .dropdown-input-row button:hover {
-        background:#ddd;
+        background:#f0f0f0;
+        transform:translateY(-2px);
+        box-shadow:0 4px 12px rgba(255,255,255,0.15);
+      }
+      .dropdown-input-row button:active {
+        transform:translateY(0px);
+        box-shadow:0 1px 4px rgba(255,255,255,0.1);
+      }
+      /* Custom currency dropdown */
+      .currency-selector-wrapper {
+        position:relative;
+        display:inline-block;
+        width:100%;
+        z-index:999;
+      }
+      .currency-selector-btn {
+        width:100%;
+        padding:10px 12px;
+        border-radius:8px;
+        border:1px solid rgba(255,255,255,0.15);
+        background:rgba(255,255,255,0.08);
+        color:#fff;
+        font-size:13px;
+        font-weight:500;
+        cursor:pointer;
+        display:flex;
+        justify-content:space-between;
+        align-items:center;
+        transition:all 200ms ease;
+        min-height:40px;
+      }
+      .currency-selector-btn:hover {
+        background:rgba(255,255,255,0.1);
+        border-color:rgba(255,255,255,0.2);
+      }
+      .currency-selector-btn:focus {
+        outline:none;
+        background:rgba(255,255,255,0.12);
+        border-color:rgba(255,255,255,0.3);
+        box-shadow:0 0 8px rgba(255,255,255,0.1);
+      }
+      .currency-selector-btn.open {
+        background:rgba(255,255,255,0.12);
+        border-color:rgba(255,255,255,0.3);
+      }
+      .currency-selector-arrow {
+        transition:transform 200ms ease;
+      }
+      .currency-selector-btn.open .currency-selector-arrow {
+        transform:rotate(180deg);
+      }
+      .currency-dropdown-menu {
+        position:fixed;
+        background:rgba(10,12,16,0.99);
+        border:1px solid rgba(255,255,255,0.15);
+        border-radius:8px;
+        box-shadow:0 12px 40px rgba(0,0,0,0.8);
+        max-height:0;
+        overflow-y:auto;
+        overflow-x:hidden;
+        transition:max-height 220ms cubic-bezier(0.4, 0, 0.2, 1);
+        z-index:9999;
+        min-width:180px;
+        visibility:hidden;
+      }
+      .currency-dropdown-menu.show {
+        max-height:300px;
+        visibility:visible;
+      }
+      .currency-option {
+        padding:14px 16px;
+        color:#ddd;
+        cursor:pointer;
+        display:flex;
+        align-items:center;
+        gap:12px;
+        transition:all 150ms ease;
+        border-bottom:1px solid rgba(255,255,255,0.06);
+        font-size:13px;
+        white-space:nowrap;
+      }
+      .currency-option:last-child {
+        border-bottom:none;
+      }
+      .currency-option:hover {
+        background:rgba(255,255,255,0.1);
+        color:#fff;
+        padding-left:18px;
+      }
+      .currency-option.selected {
+        background:rgba(255,255,255,0.15);
+        color:#fff;
+        font-weight:600;
+      }
+      .currency-option.selected::before {
+        content:'✓';
+        color:#2ecc71;
+        font-weight:bold;
+        margin-right:4px;
+      }
+      .currency-code {
+        font-weight:600;
+        letter-spacing:0.5px;
+      }
+      .currency-name {
+        font-size:11px;
+        color:rgba(255,255,255,0.6);
+        margin-left:auto;
+      }
+      .currency-option:hover .currency-name {
+        color:rgba(255,255,255,0.8);
       }
       .dropdown-toggle {
         position:fixed;
         left:12px;
         bottom:12px;
         z-index:90;
-        padding:8px 12px;
+        padding:10px 14px;
         border-radius:8px;
         cursor:pointer;
         background:#fff;
@@ -214,14 +362,22 @@
         font-weight:600;
         font-size:13px;
         box-shadow:0 4px 12px rgba(0,0,0,0.3);
-        transition:transform 160ms ease;
+        transition:all 200ms cubic-bezier(0.4, 0, 0.2, 1);
       }
       .dropdown-toggle:hover {
-        transform:translateY(-2px);
+        transform:translateY(-3px);
+        box-shadow:0 6px 16px rgba(0,0,0,0.4);
+      }
+      .dropdown-toggle:active {
+        transform:translateY(-1px);
+        box-shadow:0 3px 8px rgba(0,0,0,0.3);
       }
       .dropdown-toggle.active {
         background:#000;
         color:#fff;
+      }
+      .dropdown-toggle.active:hover {
+        background:#222;
       }
     </style>
   </head>
@@ -232,10 +388,22 @@
       <div id="dropdownUsersList"></div>
       <div class="dropdown-input-row">
         <input id="topAmount" type="number" step="0.01" min="0" placeholder="Amount" />
-        <select id="topCurrency">
-          <option value="USD">USD</option>
-          <option value="EUR">EUR</option>
-        </select>
+        <div class="currency-selector-wrapper">
+          <button id="topCurrencyBtn" class="currency-selector-btn" type="button">
+            <span id="topCurrencyDisplay">USD</span>
+            <span class="currency-selector-arrow">▾</span>
+          </button>
+          <div id="topCurrencyMenu" class="currency-dropdown-menu">
+            <div class="currency-option selected" data-value="USD">
+              <span class="currency-code">USD</span>
+              <span class="currency-name">US Dollar</span>
+            </div>
+            <div class="currency-option" data-value="EUR">
+              <span class="currency-code">EUR</span>
+              <span class="currency-name">Euro</span>
+            </div>
+          </div>
+        </div>
         <button id="topAddBtn">Add</button>
       </div>
     </div>
@@ -249,21 +417,32 @@
     <div class="container">
         <h1>Input your values</h1>
     <form id="personForm">
-      <label>First name
+      <label>Budget name
         <input id="firstName" name="firstName" required />
       </label>
-      <label>Last name
+      <label>Owner name
         <input id="lastName" name="lastName" required />
       </label>
       <label>Amount
         <input id="entryAmount" name="amount" type="number" step="0.01" min="0" placeholder="e.g. 100" />
       </label>
       <label>Currency
-        <select id="entryCurrency" name="currency">
-          <option value="TND">TND</option>
-          <option value="USD">USD</option>
-          <option value="EUR">EUR</option>
-        </select>
+        <div class="currency-selector-wrapper" style="margin-top:6px">
+          <button id="entryCurrencyBtn" class="currency-selector-btn" type="button">
+            <span id="entryCurrencyDisplay">USD</span>
+            <span class="currency-selector-arrow">▾</span>
+          </button>
+          <div id="entryCurrencyMenu" class="currency-dropdown-menu">
+            <div class="currency-option selected" data-value="USD">
+              <span class="currency-code">USD</span>
+              <span class="currency-name">US Dollar</span>
+            </div>
+            <div class="currency-option" data-value="EUR">
+              <span class="currency-code">EUR</span>
+              <span class="currency-name">Euro</span>
+            </div>
+          </div>
+        </div>
       </label>
       <button class="btn" type="submit">Save</button>
     </form>
@@ -292,11 +471,21 @@
         <input id="convAmount" class="conv-input" type="number" step="0.01" min="0" value="1" />
       </div>
       <div style="margin-top:8px; display:flex; gap:8px">
-        <div class="conv-select-wrap" style="flex:1">
-          <select id="convTarget" class="conv-select">
-            <option value="USD">USD</option>
-            <option value="EUR">EUR</option>
-          </select>
+        <div class="currency-selector-wrapper" style="flex:1">
+          <button id="convTargetBtn" class="currency-selector-btn" type="button" style="width:100%">
+            <span id="convTargetDisplay">USD</span>
+            <span class="currency-selector-arrow">▾</span>
+          </button>
+          <div id="convTargetMenu" class="currency-dropdown-menu">
+            <div class="currency-option selected" data-value="USD">
+              <span class="currency-code">USD</span>
+              <span class="currency-name">US Dollar</span>
+            </div>
+            <div class="currency-option" data-value="EUR">
+              <span class="currency-code">EUR</span>
+              <span class="currency-name">Euro</span>
+            </div>
+          </div>
         </div>
         <button id="convBtn" class="conv-btn">Convert</button>
       </div>
@@ -321,6 +510,25 @@
     </aside>
 
     <script>
+      // Helper function to position dropdown menus using fixed positioning
+      function positionDropdownMenu(button, menu) {
+        const rect = button.getBoundingClientRect();
+        menu.style.position = 'fixed';
+        menu.style.top = (rect.bottom + 2) + 'px';
+        menu.style.left = rect.left + 'px';
+        menu.style.width = Math.max(rect.width, 180) + 'px';
+      }
+
+      // Helper function to position dropdown menus above the button (drop-up)
+      function positionDropupMenu(button, menu) {
+        const rect = button.getBoundingClientRect();
+        const menuHeight = menu.scrollHeight || 200; // estimate if not yet rendered
+        menu.style.position = 'fixed';
+        menu.style.top = (rect.top - menuHeight - 2) + 'px';
+        menu.style.left = rect.left + 'px';
+        menu.style.width = Math.max(rect.width, 180) + 'px';
+      }
+
       const form = document.getElementById('personForm');
       const firstName = document.getElementById('firstName');
       const lastName = document.getElementById('lastName');
@@ -330,7 +538,48 @@
       const logList = document.getElementById('logList');
       const logClear = document.getElementById('logClear');
       const entryAmountEl = document.getElementById('entryAmount');
-      const entryCurrencyEl = document.getElementById('entryCurrency');
+      
+      // Custom entry currency dropdown
+      const entryCurrencyBtn = document.getElementById('entryCurrencyBtn');
+      const entryCurrencyDisplay = document.getElementById('entryCurrencyDisplay');
+      const entryCurrencyMenu = document.getElementById('entryCurrencyMenu');
+      const entryCurrencyOptions = document.querySelectorAll('#entryCurrencyMenu .currency-option');
+      let selectedEntryCurrency = 'USD';
+
+      function toggleEntryCurrencyMenu(e) {
+        e.stopPropagation();
+        entryCurrencyBtn.classList.toggle('open');
+        entryCurrencyMenu.classList.toggle('show');
+        if (entryCurrencyMenu.classList.contains('show')) {
+          positionDropdownMenu(entryCurrencyBtn, entryCurrencyMenu);
+        }
+      }
+
+      function closeEntryCurrencyMenu() {
+        entryCurrencyBtn.classList.remove('open');
+        entryCurrencyMenu.classList.remove('show');
+      }
+
+      entryCurrencyBtn.addEventListener('click', toggleEntryCurrencyMenu);
+
+      entryCurrencyOptions.forEach(option => {
+        option.addEventListener('click', (e) => {
+          e.stopPropagation();
+          selectedEntryCurrency = option.dataset.value;
+          entryCurrencyDisplay.textContent = selectedEntryCurrency;
+          
+          entryCurrencyOptions.forEach(opt => opt.classList.remove('selected'));
+          option.classList.add('selected');
+          
+          closeEntryCurrencyMenu();
+        });
+      });
+
+      document.addEventListener('click', (e) => {
+        if (!entryCurrencyBtn.contains(e.target) && !entryCurrencyMenu.contains(e.target)) {
+          closeEntryCurrencyMenu();
+        }
+      });
 
       // Ensure amount input keeps two decimal places on blur/change
       if (entryAmountEl) {
@@ -465,10 +714,8 @@
         e.preventDefault();
         const payload = { firstName: firstName.value.trim(), lastName: lastName.value.trim() };
           // include optional amount/currency from the form
-          const entryAmountEl = document.getElementById('entryAmount');
-          const entryCurrencyEl = document.getElementById('entryCurrency');
           if (entryAmountEl && entryAmountEl.value) payload.amount = parseFloat(entryAmountEl.value);
-          if (entryCurrencyEl && entryCurrencyEl.value) payload.currency = entryCurrencyEl.value;
+          payload.currency = selectedEntryCurrency;
         if (!payload.firstName || !payload.lastName) return alert('Both fields required');
         
         // If TND is selected, convert to USD and EUR before sending
@@ -641,10 +888,52 @@
 
       // Currency converter logic
       const convAmount = document.getElementById('convAmount');
-      const convTarget = document.getElementById('convTarget');
       const convBtn = document.getElementById('convBtn');
       const convResult = document.getElementById('convResult');
       const convRateDisplay = document.getElementById('convRateDisplay');
+      
+      // Custom converter target dropdown
+      const convTargetBtn = document.getElementById('convTargetBtn');
+      const convTargetDisplay = document.getElementById('convTargetDisplay');
+      const convTargetMenu = document.getElementById('convTargetMenu');
+      const convTargetOptions = document.querySelectorAll('#convTargetMenu .currency-option');
+      let selectedConvTarget = 'USD';
+
+      function toggleConvTargetMenu(e) {
+        e.stopPropagation();
+        convTargetBtn.classList.toggle('open');
+        convTargetMenu.classList.toggle('show');
+        if (convTargetMenu.classList.contains('show')) {
+          positionDropdownMenu(convTargetBtn, convTargetMenu);
+        }
+      }
+
+      function closeConvTargetMenu() {
+        convTargetBtn.classList.remove('open');
+        convTargetMenu.classList.remove('show');
+      }
+
+      convTargetBtn.addEventListener('click', toggleConvTargetMenu);
+
+      convTargetOptions.forEach(option => {
+        option.addEventListener('click', async (e) => {
+          e.stopPropagation();
+          selectedConvTarget = option.dataset.value;
+          convTargetDisplay.textContent = selectedConvTarget;
+          
+          convTargetOptions.forEach(opt => opt.classList.remove('selected'));
+          option.classList.add('selected');
+          
+          closeConvTargetMenu();
+          await updateRateDisplay();
+        });
+      });
+
+      document.addEventListener('click', (e) => {
+        if (!convTargetBtn.contains(e.target) && !convTargetMenu.contains(e.target)) {
+          closeConvTargetMenu();
+        }
+      });
 
       // Use open.er-api.com for free latest rates (base TND). Cache for 10 minutes.
       let _cachedRates = null;
@@ -670,7 +959,7 @@
       async function updateRateDisplay(){
         convRateDisplay.textContent = 'Loading...';
         const rates = await fetchRates();
-        const target = convTarget.value || 'USD';
+        const target = selectedConvTarget || 'USD';
         if (!rates || typeof rates[target] !== 'number'){
           convRateDisplay.textContent = 'Rate unavailable';
           return;
@@ -678,15 +967,13 @@
         convRateDisplay.textContent = `1 TND ≈ ${rates[target].toFixed(4)} ${target}`;
       }
 
-      convTarget.addEventListener('change', updateRateDisplay);
-
       convBtn.addEventListener('click', async () => {
         const amt = parseFloat(convAmount.value || '0');
         if (!amt || amt <= 0) { convResult.textContent = 'Enter a value > 0'; return; }
         convResult.textContent = 'Converting...';
         const rates = await fetchRates();
         if (!rates) { convResult.textContent = 'Failed to fetch rates'; return; }
-        const target = convTarget.value || 'USD';
+        const target = selectedConvTarget || 'USD';
         const rate = rates[target];
         if (typeof rate !== 'number') { convResult.textContent = 'Rate unavailable'; return; }
         const converted = (amt * rate).toFixed(4);
@@ -699,8 +986,15 @@
             // set to 2 decimal places for clarity
             entryAmountEl.value = Number(converted).toFixed(2);
           }
-          if (typeof entryCurrencyEl !== 'undefined' && entryCurrencyEl) {
-            entryCurrencyEl.value = target;
+          // Update the entry currency dropdown to match the conversion target
+          selectedEntryCurrency = target;
+          entryCurrencyDisplay.textContent = target;
+          
+          // Update the selected state in the dropdown options
+          entryCurrencyOptions.forEach(opt => opt.classList.remove('selected'));
+          const selectedOption = document.querySelector(`#entryCurrencyMenu .currency-option[data-value="${target}"]`);
+          if (selectedOption) {
+            selectedOption.classList.add('selected');
           }
         } catch (e) {
           // ignore if form elements not present
@@ -769,6 +1063,48 @@
         });
       }
 
+      // Custom top currency dropdown
+      const topCurrencyBtn = document.getElementById('topCurrencyBtn');
+      const topCurrencyDisplay = document.getElementById('topCurrencyDisplay');
+      const topCurrencyMenu = document.getElementById('topCurrencyMenu');
+      const topCurrencyOptions = document.querySelectorAll('#topCurrencyMenu .currency-option');
+      let selectedTopCurrency = 'USD';
+
+      function toggleTopCurrencyMenu(e) {
+        e.stopPropagation();
+        topCurrencyBtn.classList.toggle('open');
+        topCurrencyMenu.classList.toggle('show');
+        if (topCurrencyMenu.classList.contains('show')) {
+          positionDropupMenu(topCurrencyBtn, topCurrencyMenu);
+        }
+      }
+
+      function closeTopCurrencyMenu() {
+        topCurrencyBtn.classList.remove('open');
+        topCurrencyMenu.classList.remove('show');
+      }
+
+      topCurrencyBtn.addEventListener('click', toggleTopCurrencyMenu);
+
+      topCurrencyOptions.forEach(option => {
+        option.addEventListener('click', (e) => {
+          e.stopPropagation();
+          selectedTopCurrency = option.dataset.value;
+          topCurrencyDisplay.textContent = selectedTopCurrency;
+          
+          topCurrencyOptions.forEach(opt => opt.classList.remove('selected'));
+          option.classList.add('selected');
+          
+          closeTopCurrencyMenu();
+        });
+      });
+
+      document.addEventListener('click', (e) => {
+        if (!topCurrencyBtn.contains(e.target) && !topCurrencyMenu.contains(e.target)) {
+          closeTopCurrencyMenu();
+        }
+      });
+
       // helper: convert EUR -> USD using open.er-api.com
       async function convertEURtoUSD(eurAmount){
         try {
@@ -785,7 +1121,7 @@
         const [first, last] = selectedUserKey.split('||');
         const amt = parseFloat(topAmount.value || '0');
         if (!amt || amt <= 0) return alert('Enter an amount > 0');
-        const currency = topCurrency.value || 'USD';
+        const currency = selectedTopCurrency || 'USD';
         const payload = { firstName: first, lastName: last, amount: amt, currency };
         
         // If USD is selected, add to USD balance

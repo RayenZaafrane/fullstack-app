@@ -1,56 +1,40 @@
 {
   "people": [
     {
-      "id": 1765307402215,
-      "firstName": "1",
-      "lastName": "1",
-      "usd": 1000,
-      "eur": 0,
-      "createdAt": "2025-12-09T19:10:02.215Z",
-      "updatedAt": "2025-12-09T19:10:12.448Z"
+      "id": 1765368218627,
+      "firstName": "America's Travel",
+      "lastName": "Rayen zaafrane",
+      "usd": 0,
+      "eur": 292.67,
+      "createdAt": "2025-12-10T12:03:38.626Z",
+      "updatedAt": "2025-12-10T12:03:38.626Z"
     },
     {
-      "id": 1765307427789,
-      "firstName": "Hydrogrun",
+      "id": 1765370292056,
+      "firstName": "Europe Travel",
       "lastName": "Grun",
-      "usd": 1000,
-      "eur": 200,
-      "createdAt": "2025-12-09T19:10:27.789Z",
-      "updatedAt": "2025-12-09T19:10:39.318Z"
+      "usd": 0,
+      "eur": 292.67,
+      "createdAt": "2025-12-10T12:38:12.055Z",
+      "updatedAt": "2025-12-10T12:38:12.055Z"
     }
   ],
   "transactions": [
     {
-      "id": 1765307402215.6292,
-      "firstName": "1",
-      "lastName": "1",
-      "amount": 500,
-      "currency": "USD",
-      "createdAt": "2025-12-09T19:10:02.215Z"
-    },
-    {
-      "id": 1765307412448.918,
-      "firstName": "1",
-      "lastName": "1",
-      "amount": 500,
-      "currency": "USD",
-      "createdAt": "2025-12-09T19:10:12.448Z"
-    },
-    {
-      "id": 1765307427789.985,
-      "firstName": "Hydrogrun",
-      "lastName": "Grun",
-      "amount": 200,
+      "id": 1765368218627.2378,
+      "firstName": "America's Travel",
+      "lastName": "Rayen zaafrane",
+      "amount": 292.67,
       "currency": "EUR",
-      "createdAt": "2025-12-09T19:10:27.789Z"
+      "createdAt": "2025-12-10T12:03:38.626Z"
     },
     {
-      "id": 1765307439318.1528,
-      "firstName": "Hydrogrun",
+      "id": 1765370292056.8618,
+      "firstName": "Europe Travel",
       "lastName": "Grun",
-      "amount": 1000,
-      "currency": "USD",
-      "createdAt": "2025-12-09T19:10:39.318Z"
+      "amount": 292.67,
+      "currency": "EUR",
+      "createdAt": "2025-12-10T12:38:12.055Z"
     }
   ]
 }
