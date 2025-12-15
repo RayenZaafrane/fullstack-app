@@ -1,6 +1,6 @@
-# Fullstack Names App
+# Fullstack tracking App
 
-Simple Express app to collect first and last names and persist them in a local JSON database.
+Simple Express app to collect your financial data and persist them in a local JSON database.
 
 Run locally (PowerShell):
 Create a folder in your "Users\yourusename" named "fullstack-app" in "c:\"
